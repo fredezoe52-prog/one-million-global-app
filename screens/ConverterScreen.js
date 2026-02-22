@@ -12,6 +12,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { fetchEurRate, FALLBACK_RATE, FEE_USD, validateAmount, convertUsdToEur } from '../utils/api';
 import { loadHistory, saveHistory } from '../utils/storage';
 
+const MAX_HISTORY = 20;
+
 export default function ConverterScreen() {
   const [amount, setAmount] = useState('');
   const [rate, setRate] = useState(null);
@@ -73,7 +75,7 @@ export default function ConverterScreen() {
       rate: conversion.rate,
       date: new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }),
     };
-    const updated = [entry, ...history].slice(0, 20);
+    const updated = [entry, ...history].slice(0, MAX_HISTORY);
     setHistory(updated);
     await saveHistory(updated);
   };
