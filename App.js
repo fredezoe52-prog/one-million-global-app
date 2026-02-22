@@ -1,18 +1,40 @@
-import React, { useState } from 'react';
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const HISTORY_KEY = 'conversion_history';
 
 export default function App() {
   const [amount, setAmount] = useState('');
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(HISTORY_KEY)
+      .then((stored) => {
+        if (stored) setHistory(JSON.parse(stored));
+      })
+      .catch(() => {});
+  }, []);
+
+  const saveHistory = async (newHistory) => {
+    setHistory(newHistory);
+    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+  };
 
   const convertCurrency = () => {
     if (!amount) return;
     const converted = parseFloat(amount) * 0.92; // exemple USD → EUR
-    setResult(converted.toFixed(2));
+    const res = converted.toFixed(2);
+    setResult(res);
+    const entry = { id: Date.now().toString(), usd: amount, eur: res, date: new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) };
+    saveHistory([entry, ...history].slice(0, 20));
   };
 
+  const clearHistory = () => saveHistory([]);
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>One Million Global</Text>
 
       <TextInput
@@ -26,13 +48,29 @@ export default function App() {
       <Button title="Convertir (4.99$ frais)" onPress={convertCurrency} />
 
       {result && <Text style={styles.result}>Résultat: {result} EUR</Text>}
-    </View>
+
+      {history.length > 0 && (
+        <View style={styles.historyContainer}>
+          <View style={styles.historyHeader}>
+            <Text style={styles.historyTitle}>Historique des conversions</Text>
+            <TouchableOpacity onPress={clearHistory}>
+              <Text style={styles.clearBtn}>Effacer</Text>
+            </TouchableOpacity>
+          </View>
+          {history.map((item) => (
+            <Text key={item.id} style={styles.historyItem} selectable>
+              {item.date} — {item.usd} USD → {item.eur} EUR
+            </Text>
+          ))}
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20
   },
@@ -50,5 +88,31 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 18,
     textAlign: 'center'
+  },
+  historyContainer: {
+    marginTop: 30,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    paddingTop: 15
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  clearBtn: {
+    color: 'red',
+    fontSize: 14
+  },
+  historyItem: {
+    fontSize: 14,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee'
   }
 });
