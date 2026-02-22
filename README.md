@@ -75,10 +75,121 @@ HistoryScreen.js
 
 ---
 
-## Prérequis
+## 🚀 Prochaines étapes pour vous — dans l'ordre
 
-- [Node.js](https://nodejs.org/) v18+
-- [EAS CLI](https://docs.expo.dev/build/introduction/) : `npm install -g eas-cli`
+Le code est 100% prêt sur GitHub. Voici exactement ce qu'il vous reste à faire vous-même :
+
+---
+
+### Étape 1 — Fusionner la Pull Request sur GitHub
+
+Le code se trouve sur la branche `copilot/fix-conversation-loss-issue`. Pour le mettre sur `main` :
+
+1. Allez sur [github.com/fredezoe52-prog/one-million-global-app](https://github.com/fredezoe52-prog/one-million-global-app)
+2. Cliquez sur **"Compare & pull request"** (ou **"Pull requests"**)
+3. Cliquez sur **"Merge pull request"** → **"Confirm merge"**
+
+---
+
+### Étape 2 — Cloner et installer le projet sur votre ordinateur
+
+Ouvrez un terminal et tapez :
+
+```bash
+git clone https://github.com/fredezoe52-prog/one-million-global-app.git
+cd one-million-global-app
+npm install
+```
+
+---
+
+### Étape 3 — Tester l'application sur votre téléphone
+
+1. Installez **Expo Go** sur votre téléphone :
+   - Android : [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
+   - iPhone : [App Store](https://apps.apple.com/app/expo-go/id982107779)
+
+2. Dans le terminal :
+   ```bash
+   npm start
+   ```
+
+3. Scannez le **QR code** affiché avec Expo Go → l'application s'ouvre sur votre téléphone.
+
+---
+
+### Étape 4 — Créer un compte Expo (gratuit)
+
+Nécessaire pour générer l'APK officiel.
+
+1. Allez sur [expo.dev](https://expo.dev) → **Sign up** (gratuit)
+2. Dans le terminal, connectez-vous :
+   ```bash
+   eas login
+   ```
+3. Liez votre projet :
+   ```bash
+   eas init
+   ```
+
+---
+
+### Étape 5 — Ajouter le secret EXPO_TOKEN pour le build automatique
+
+Une seule fois, dans GitHub :
+
+1. Sur [expo.dev](https://expo.dev) → **Account Settings → Access Tokens → Create Token**
+2. Copiez le token
+3. Sur GitHub → **Settings → Secrets and variables → Actions → New repository secret**
+   - Nom : `EXPO_TOKEN`
+   - Valeur : votre token Expo
+4. Désormais, chaque push sur `main` génère automatiquement un APK Android
+
+---
+
+### Étape 6 — Générer votre APK Android (fichier d'installation)
+
+Dans le terminal, depuis le dossier du projet :
+
+```bash
+eas build --platform android --profile preview
+```
+
+Cela génère un fichier `.apk` que vous pouvez :
+- Installer directement sur votre téléphone Android
+- Partager avec d'autres personnes
+
+---
+
+### Étape 7 — Publier sur le Google Play Store (optionnel)
+
+Pour rendre l'app disponible publiquement sur Android :
+
+1. Créez un compte **Google Play Developer** : [play.google.com/console](https://play.google.com/console) _(frais d'inscription uniques — vérifiez le montant actuel sur le site)_
+2. Générez un build de production :
+   ```bash
+   eas build --platform android --profile production
+   ```
+3. Soumettez avec EAS :
+   ```bash
+   eas submit --platform android
+   ```
+
+---
+
+### Résumé
+
+| Étape | Action | Où |
+|---|---|---|
+| 1 | Fusionner la Pull Request | GitHub |
+| 2 | Cloner + `npm install` | Votre ordinateur |
+| 3 | Tester avec Expo Go | Votre téléphone |
+| 4 | Créer compte Expo + `eas init` | expo.dev + terminal |
+| 5 | Ajouter `EXPO_TOKEN` | GitHub Secrets |
+| 6 | Générer APK : `eas build --platform android --profile preview` | Terminal |
+| 7 | Publier sur Google Play *(optionnel)* | play.google.com/console |
+
+---
 
 ## Installation
 
@@ -105,21 +216,6 @@ npm run web        # Navigateur web
 |---|---|
 | Android (`package`) | `com.onemillionglobal.app` |
 | iOS (`bundleIdentifier`) | `com.onemillionglobal.app` |
-
----
-
-## Build automatique (Module 9 — CI/CD)
-
-À chaque push sur `main`, GitHub Actions génère automatiquement un APK Android via EAS.
-
-**Pour activer :**
-1. Créez un compte sur [expo.dev](https://expo.dev)
-2. Générez un token : **Account Settings → Access Tokens → Create Token**
-3. Ajoutez-le dans GitHub : **Settings → Secrets → Actions → New secret**
-   - Nom : `EXPO_TOKEN`
-   - Valeur : votre token Expo
-
-Le projet est également configuré pour Codemagic (`codemagic.yaml`).
 
 ---
 
