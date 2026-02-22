@@ -45,14 +45,28 @@ Scannez le QR code avec l'application **Expo Go** sur votre téléphone.
 
 ```
 one-million-global-app/
-├── App.js           # Composant principal de l'application
-├── app.json         # Configuration Expo
-├── babel.config.js  # Configuration Babel
-├── package.json     # Dépendances et scripts
-├── .gitignore       # Fichiers ignorés par Git
+├── App.js               # Composant principal de l'application
+├── app.json             # Configuration Expo (identifiants Android/iOS inclus)
+├── babel.config.js      # Configuration Babel
+├── package.json         # Dépendances et scripts
+├── .gitignore           # Fichiers ignorés par Git
+├── assets/
+│   ├── icon.png         # Icône de l'application (1024×1024)
+│   ├── splash.png       # Écran de démarrage (1242×2436)
+│   ├── adaptive-icon.png# Icône adaptive Android (1024×1024)
+│   └── favicon.png      # Favicon web (196×196)
 └── .github/
-    └── workflows/   # Pipelines CI/CD
+    └── workflows/       # Pipelines CI/CD
 ```
+
+## Identifiants de l'application
+
+| Plateforme | Identifiant |
+|---|---|
+| Android (`package`) | `com.onemillionglobal.app` |
+| iOS (`bundleIdentifier`) | `com.onemillionglobal.app` |
+
+Ces identifiants sont déjà configurés dans `app.json`.
 
 ## Build Android (via Codemagic)
 
