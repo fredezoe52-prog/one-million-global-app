@@ -9,10 +9,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchEurRate, FALLBACK_RATE } from '../utils/api';
+import { fetchEurRate, FALLBACK_RATE, FEE_USD, validateAmount, convertUsdToEur } from '../utils/api';
 import { loadHistory, saveHistory } from '../utils/storage';
-
-const FEE_USD = 4.99;
 
 export default function ConverterScreen() {
   const [amount, setAmount] = useState('');
@@ -23,14 +21,25 @@ export default function ConverterScreen() {
   const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
 
-  useEffect(() => {
+  const loadRate = useCallback((forceRefresh = false) => {
     setRateLoading(true);
-    fetchEurRate().then((r) => {
-      setRate(r);
-      setRateLive(r !== FALLBACK_RATE);
-      setRateLoading(false);
-    });
+    fetchEurRate(forceRefresh)
+      .then((r) => {
+        setRate(r);
+        setRateLive(r !== FALLBACK_RATE);
+      })
+      .catch(() => {
+        setRate(FALLBACK_RATE);
+        setRateLive(false);
+      })
+      .finally(() => {
+        setRateLoading(false);
+      });
   }, []);
+
+  useEffect(() => {
+    loadRate();
+  }, [loadRate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,25 +57,20 @@ export default function ConverterScreen() {
     setError('');
     setResult(null);
 
-    const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) {
-      setError('Veuillez entrer un montant valide.');
-      return;
-    }
-    if (parsed <= FEE_USD) {
-      setError(`Le montant doit être supérieur aux frais (${FEE_USD} $).`);
+    const { valid, error: validationError } = validateAmount(amount);
+    if (!valid) {
+      setError(validationError);
       return;
     }
 
-    const net = parsed - FEE_USD;
-    const eur = (net * rate).toFixed(2);
-    setResult({ gross: parsed.toFixed(2), net: net.toFixed(2), eur });
+    const conversion = convertUsdToEur(amount, rate);
+    setResult(conversion);
 
     const entry = {
       id: Date.now().toString(),
-      usd: parsed.toFixed(2),
-      eur,
-      rate: rate.toFixed(4),
+      usd: conversion.gross,
+      eur: conversion.eur,
+      rate: conversion.rate,
       date: new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }),
     };
     const updated = [entry, ...history].slice(0, 20);
@@ -90,6 +94,9 @@ export default function ConverterScreen() {
             <Text style={styles.rateText}>
               {rateLive ? 'Taux live' : 'Taux de repli'} : 1 USD = {rate.toFixed(4)} EUR
             </Text>
+            <TouchableOpacity onPress={() => loadRate(true)} style={styles.refreshBtn}>
+              <Text style={styles.refreshBtnText}>↻</Text>
+            </TouchableOpacity>
           </>
         )}
       </View>
@@ -167,8 +174,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   rateText: {
+    flex: 1,
     fontSize: 14,
     color: '#555',
+  },
+  refreshBtn: {
+    marginLeft: 10,
+    paddingHorizontal: 6,
+  },
+  refreshBtnText: {
+    fontSize: 20,
+    color: '#c8960c',
   },
   input: {
     borderWidth: 1,

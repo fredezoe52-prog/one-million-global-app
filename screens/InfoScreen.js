@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,21 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-
-const FEE_USD = 4.99;
+import { FEE_USD, fetchEurRate, FALLBACK_RATE } from '../utils/api';
 
 export default function InfoScreen() {
+  const [rate, setRate] = useState(null);
+  const [rateLive, setRateLive] = useState(false);
+
+  useEffect(() => {
+    fetchEurRate()
+      .then((r) => {
+        setRate(r);
+        setRateLive(r !== FALLBACK_RATE);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.appName}>One Million Global</Text>
@@ -47,8 +58,16 @@ export default function InfoScreen() {
         <Text style={styles.cardTitle}>Taux de change en temps réel</Text>
         <Text style={styles.cardText}>
           Les taux sont récupérés automatiquement depuis Open Exchange Rates API.
-          En cas d'indisponibilité du réseau, un taux de repli (0,92) est utilisé.
+          En cas d'indisponibilité du réseau, un taux de repli ({FALLBACK_RATE}) est utilisé.
         </Text>
+        {rate !== null && (
+          <View style={styles.rateRow}>
+            <View style={[styles.rateDot, { backgroundColor: rateLive ? '#4caf50' : '#ff9800' }]} />
+            <Text style={styles.rateValue}>
+              {rateLive ? 'Taux live' : 'Taux de repli'} : 1 USD = {rate.toFixed(4)} EUR
+            </Text>
+          </View>
+        )}
         <TouchableOpacity
           onPress={() => Linking.openURL('https://open.er-api.com')}
           style={styles.linkRow}
@@ -116,6 +135,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#444',
     lineHeight: 21,
+  },
+  rateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  rateDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  rateValue: {
+    fontSize: 14,
+    color: '#555',
   },
   step: {
     flexDirection: 'row',
