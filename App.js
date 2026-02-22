@@ -1,54 +1,72 @@
-import React, { useState } from 'react';
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function App() {
-  const [amount, setAmount] = useState('');
-  const [result, setResult] = useState(null);
+import ConverterScreen from './screens/ConverterScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import InfoScreen from './screens/InfoScreen';
 
-  const convertCurrency = () => {
-    if (!amount) return;
-    const converted = parseFloat(amount) * 0.92; // exemple USD → EUR
-    setResult(converted.toFixed(2));
+const Tab = createBottomTabNavigator();
+
+const ICON_MAP = {
+  Convertir:  { focused: 'swap-horizontal',          blur: 'swap-horizontal-outline' },
+  Historique: { focused: 'time',                      blur: 'time-outline' },
+  Info:       { focused: 'information-circle',        blur: 'information-circle-outline' },
+};
+
+function tabBarIcon(route) {
+  return ({ focused, color, size }) => {
+    const icons = ICON_MAP[route.name] || { focused: 'ellipse', blur: 'ellipse-outline' };
+    return <Ionicons name={focused ? icons.focused : icons.blur} size={size} color={color} />;
   };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>One Million Global</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Montant en USD"
-        keyboardType="numeric"
-        value={amount}
-        onChangeText={setAmount}
-      />
-
-      <Button title="Convertir (4.99$ frais)" onPress={convertCurrency} />
-
-      {result && <Text style={styles.result}>Résultat: {result} EUR</Text>}
-    </View>
-  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20
-  },
-  title: {
-    fontSize: 24,
-    textAlign: 'center',
-    marginBottom: 20
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 15
-  },
-  result: {
-    marginTop: 20,
-    fontSize: 18,
-    textAlign: 'center'
-  }
-});
+export default function App() {
+  return (
+    <NavigationContainer>
+      <StatusBar style="light" />
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: tabBarIcon(route),
+          tabBarActiveTintColor: '#c8960c',
+          tabBarInactiveTintColor: '#999',
+          tabBarStyle: {
+            backgroundColor: '#1e1e32',
+            borderTopColor: '#2e2e4a',
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+          headerStyle: {
+            backgroundColor: '#1e1e32',
+          },
+          headerTintColor: '#c8960c',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 18,
+          },
+          headerTitleAlign: 'center',
+        })}
+      >
+        <Tab.Screen
+          name="Convertir"
+          component={ConverterScreen}
+          options={{ title: 'One Million Global', tabBarLabel: 'Convertir' }}
+        />
+        <Tab.Screen
+          name="Historique"
+          component={HistoryScreen}
+          options={{ title: 'Historique', tabBarLabel: 'Historique' }}
+        />
+        <Tab.Screen
+          name="Info"
+          component={InfoScreen}
+          options={{ title: 'Informations', tabBarLabel: 'Info' }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}

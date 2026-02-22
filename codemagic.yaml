@@ -1,19 +1,17 @@
 workflows:
   expo_android:
-    name: Expo Android Build
+    name: Expo Android Build (EAS)
     max_build_duration: 60
     environment:
       vars:
-        EXPO_CLI_VERSION: latest
+        EAS_CLI_VERSION: latest
     scripts:
       - name: Install dependencies
         script: |
-          npm install -g expo-cli
+          npm install -g eas-cli
           npm install
       - name: Build APK
         script: |
-          expo prebuild
-          cd android
-          ./gradlew assembleRelease
+          eas build --platform android --profile preview --non-interactive --local --output ./build/app.apk
     artifacts:
-      - android/app/build/outputs/**/*.apk
+      - build/*.apk
